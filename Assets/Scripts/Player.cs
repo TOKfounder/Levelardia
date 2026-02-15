@@ -23,6 +23,8 @@ public class Player : LivingEntity
 
     void Update()
     {
+		viewCamera.transform.position = new Vector3(0, 14.72f, -3.11f);
+		
 		// Movement input
         Vector3 moveInput = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
 		Vector3 moveVelocity = moveInput.normalized * moveSpeed;

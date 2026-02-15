@@ -51,15 +51,15 @@ public class Gun : MonoBehaviour
 		recoilAngle = Mathf.SmoothDamp(recoilAngle, 0, ref recoilRotSmoothDampVelocity, recoilRotationSettleTime);
 		transform.localEulerAngles = transform.localEulerAngles + Vector3.left * recoilAngle;
 
-		if (!isReloading && projectileRemainingInMag == 0)
-		{
-			Reload();
-		}
+		// if (!isReloading && projectileRemainingInMag == 0)
+		// {
+		// 	Reload();
+		// }
 	}
 
 	void Shoot()
 	{
-		if (!isReloading && Time.time > nextShotTime && projectileRemainingInMag > 0d)
+		if (Time.time > nextShotTime)
 		{
 			if (fireMode == FireMode.Burst)
 			{
@@ -77,8 +77,8 @@ public class Gun : MonoBehaviour
 
 			for (int i = 0; i < projectileSpawn.Length; i ++)
 			{
-				if (projectileRemainingInMag == 0) break;
-				projectileRemainingInMag --;
+				// if (projectileRemainingInMag == 0) break;
+				// projectileRemainingInMag --;
 				nextShotTime = Time.time + msBetweenShots / 1000;
 				Projectile newProjectile = Instantiate(projectile, projectileSpawn[i].position, projectileSpawn[i].rotation) as Projectile;
 				newProjectile.SetSpeed(muzzleVelocity);
@@ -93,14 +93,14 @@ public class Gun : MonoBehaviour
 		}
 	}
 
-	public void Reload()
-	{
-		if (!isReloading && projectileRemainingInMag != projectilePerMag)
-		{
-			StartCoroutine(AnimateReload());
-			AudioManager.instance.PlaySound(reloadAudio, transform.position);
-		}
-	}
+	// public void Reload()
+	// {
+	// 	if (!isReloading && projectileRemainingInMag != projectilePerMag)
+	// 	{
+	// 		StartCoroutine(AnimateReload());
+	// 		AudioManager.instance.PlaySound(reloadAudio, transform.position);
+	// 	}
+	// }
 
 	IEnumerator AnimateReload()
 	{
