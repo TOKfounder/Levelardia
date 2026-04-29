@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using YG;
 
 public class Spawner : MonoBehaviour
 {
@@ -101,6 +102,7 @@ public class Spawner : MonoBehaviour
 	void OnPlayerDeath()
 	{
 		isDisabled = true;
+		YG2.saves.currentWave = 1;
 	}
 
 	void OnEnemyDeath()
@@ -120,22 +122,35 @@ public class Spawner : MonoBehaviour
 
 	void NextWave()
 	{
-		if (currentWaveNumber > 0)
+		if (YG2.saves.currentWave > 0)
 		{
 			AudioManager.instance.PlaySound2D("Level Complete");
 		}
-		currentWaveNumber ++;
 		
-		if (currentWaveNumber - 1 < waves.Length)
+		if (!YG2.saves.isStartGame)
 		{
-			currentWave = waves[currentWaveNumber - 1];
+			if (YG2.saves.currentWave < 5)
+				YG2.saves.currentWave ++;
+			else
+			{
+				YG2.saves.currentWave = 1;
+			}
+		}
+		else
+			YG2.saves.isStartGame = false;
+		YG2.SaveProgress();
+
+		
+		if (YG2.saves.currentWave - 1 < waves.Length)
+		{
+			currentWave = waves[YG2.saves.currentWave - 1];
 
 			enemiesRemainingToSpawn = currentWave.enemyCount;
 			enemiesRemainingAlive = enemiesRemainingToSpawn;
 
 			if (OnNewWave != null)
 			{
-				OnNewWave(currentWaveNumber);
+				OnNewWave(YG2.saves.currentWave);
 			}
 			ResetPlayerPosition();
 		}
