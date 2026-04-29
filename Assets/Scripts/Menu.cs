@@ -4,6 +4,9 @@ using UnityEngine.UI;
 
 public class Menu : MonoBehaviour
 {
+	const string ScreenResIndexKey = "screen res index";
+	const string FullscreenKey = "fullscreen";
+
 	public GameObject mainMenuHolder;
 	public GameObject optionsMenuHolder;
 
@@ -15,8 +18,8 @@ public class Menu : MonoBehaviour
 
 	void Start()
 	{
-		activeScreenResIndex = PlayerPrefs.GetInt("screen res index");
-		bool isFullScreen = (PlayerPrefs.GetInt ("fullscreen") == 1) ? true : false;
+		activeScreenResIndex = PlayerPrefs.GetInt(ScreenResIndexKey);
+		bool isFullScreen = PlayerPrefs.GetInt(FullscreenKey) == 1;
 
 		volumeSliders[0].value = AudioManager.instance.masterVolumePercent;
 		volumeSliders[1].value = AudioManager.instance.musicVolumePercent;
@@ -55,7 +58,7 @@ public class Menu : MonoBehaviour
 			activeScreenResIndex = i;
 			float aspectRatio = 16/9f;
 			Screen.SetResolution(screenWidths[i], (int) (screenWidths[i]/aspectRatio), false);
-			PlayerPrefs.SetInt("Screen res index", activeScreenResIndex);
+			PlayerPrefs.SetInt(ScreenResIndexKey, activeScreenResIndex);
 			PlayerPrefs.Save();	
 		}
 	}
@@ -75,7 +78,7 @@ public class Menu : MonoBehaviour
 			SetScreenResolution(activeScreenResIndex);
 		}
 
-		PlayerPrefs.SetInt("fullscreen", (isFullScreen)? 1 : 0);
+		PlayerPrefs.SetInt(FullscreenKey, (isFullScreen)? 1 : 0);
 		PlayerPrefs.Save();
 	}
 

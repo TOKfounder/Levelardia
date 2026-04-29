@@ -6,11 +6,23 @@ public class ScoreKeeper : MonoBehaviour
 	float lastEnemyKillTime;
 	int streakCount;
 	float streakExpiryTime = 1;
+	Player player;
+
+	void Awake()
+	{
+		score = 0;
+		lastEnemyKillTime = -streakExpiryTime;
+		streakCount = 0;
+	}
 
 	void Start()
 	{
 		Enemy.OnDeathStatic += OnEnemyKilled;
-		FindAnyObjectByType<Player>().OnDeath += OnPlayerDeath;
+		player = FindAnyObjectByType<Player>();
+		if (player != null)
+		{
+			player.OnDeath += OnPlayerDeath;
+		}
 	}
 
 	void OnEnemyKilled()
@@ -31,5 +43,18 @@ public class ScoreKeeper : MonoBehaviour
 	void OnPlayerDeath()
 	{
 		Enemy.OnDeathStatic -= OnEnemyKilled;
+		if (player != null)
+		{
+			player.OnDeath -= OnPlayerDeath;
+		}
+	}
+
+	void OnDestroy()
+	{
+		Enemy.OnDeathStatic -= OnEnemyKilled;
+		if (player != null)
+		{
+			player.OnDeath -= OnPlayerDeath;
+		}
 	}
 }

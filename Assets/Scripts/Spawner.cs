@@ -18,6 +18,7 @@ public class Spawner : MonoBehaviour
 	float nextSpawnTime;
 
 	MapGenerator map;
+	LevelCatalog.LevelDefinition currentLevelDefinition;
 
 	float timeBetweenCampingChecks = 2;
 	float campThresholdDistance = 1.5f;
@@ -45,7 +46,8 @@ public class Spawner : MonoBehaviour
 			enabled = false;
 			return;
 		}
-		NextWave();
+		YG2.saves.currentWave = LevelCatalog.ClampLevel(YG2.saves.currentWave);
+		LoadLevel(YG2.saves.currentWave);
 	}
 
 	void Update()
@@ -103,6 +105,8 @@ public class Spawner : MonoBehaviour
 	{
 		isDisabled = true;
 		YG2.saves.currentWave = 1;
+		YG2.saves.isStartGame = true;
+		YG2.SaveProgress();
 	}
 
 	void OnEnemyDeath()
@@ -111,7 +115,7 @@ public class Spawner : MonoBehaviour
 
 		if (enemiesRemainingAlive == 0)
 		{
-			NextWave();
+			AdvanceToNextLevel();
 		}
 	}
 
@@ -120,40 +124,32 @@ public class Spawner : MonoBehaviour
 		playerT.position = map.GetTileFromPosition(Vector3.zero).position + Vector3.up * 3;
 	}
 
-	void NextWave()
+	void AdvanceToNextLevel()
 	{
-		if (YG2.saves.currentWave > 0)
-		{
-			AudioManager.instance.PlaySound2D("Level Complete");
-		}
-		
-		if (!YG2.saves.isStartGame)
-		{
-			if (YG2.saves.currentWave < 5)
-				YG2.saves.currentWave ++;
-			else
-			{
-				YG2.saves.currentWave = 1;
-			}
-		}
-		else
-			YG2.saves.isStartGame = false;
+		AudioManager.instance.PlaySound2D("Level Complete");
+		YG2.saves.isStartGame = false;
+		YG2.saves.currentWave = LevelCatalog.GetNextLevel(YG2.saves.currentWave);
 		YG2.SaveProgress();
+		LoadLevel(YG2.saves.currentWave);
+	}
 
-		
-		if (YG2.saves.currentWave - 1 < waves.Length)
+	void LoadLevel(int levelNumber)
+	{
+		currentLevelDefinition = LevelCatalog.GetLevel(levelNumber);
+		currentWave = currentLevelDefinition.wave;
+
+		enemiesRemainingToSpawn = currentWave.enemyCount;
+		enemiesRemainingAlive = enemiesRemainingToSpawn;
+		nextSpawnTime = Time.time;
+
+		if (OnNewWave != null)
 		{
-			currentWave = waves[YG2.saves.currentWave - 1];
-
-			enemiesRemainingToSpawn = currentWave.enemyCount;
-			enemiesRemainingAlive = enemiesRemainingToSpawn;
-
-			if (OnNewWave != null)
-			{
-				OnNewWave(YG2.saves.currentWave);
-			}
-			ResetPlayerPosition();
+			OnNewWave(currentLevelDefinition.levelNumber);
 		}
+		ResetPlayerPosition();
+		campPositionOld = playerT.position;
+		nextCampCheckTime = Time.time + timeBetweenCampingChecks;
+		isCamping = false;
 	}
 
 	[System.Serializable]

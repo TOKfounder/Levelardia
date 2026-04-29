@@ -24,18 +24,44 @@ public class MapGenerator : MonoBehaviour {
 	Transform[,] tileMap;
 	
 	Map currentMap;
+	Spawner spawner;
 	
 	void Awake() {
-		FindAnyObjectByType<Spawner> ().OnNewWave += OnNewWave;
+		spawner = FindAnyObjectByType<Spawner> ();
+		if (spawner != null)
+		{
+			spawner.OnNewWave += OnNewWave;
+		}
+	}
+
+	void OnDestroy()
+	{
+		if (spawner != null)
+		{
+			spawner.OnNewWave -= OnNewWave;
+		}
 	}
 
 	void OnNewWave(int waveNumber) {
 		mapIndex = waveNumber - 1;
-		GenerateMap ();
+		GenerateMap(LevelCatalog.GetLevel(waveNumber).map);
 	}
 
 	public void GenerateMap() {
-		currentMap = maps[mapIndex];
+		if (maps == null || maps.Length == 0)
+		{
+			currentMap = LevelCatalog.GetLevel(LevelCatalog.ClampLevel(mapIndex + 1)).map;
+		}
+		else
+		{
+			int safeIndex = Mathf.Clamp(mapIndex, 0, maps.Length - 1);
+			currentMap = maps[safeIndex];
+		}
+		GenerateMap(currentMap);
+	}
+
+	void GenerateMap(Map mapData) {
+		currentMap = mapData;
 		tileMap = new Transform[currentMap.mapSize.x,currentMap.mapSize.y];
 		System.Random prng = new System.Random (currentMap.seed);
 

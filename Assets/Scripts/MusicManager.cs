@@ -11,17 +11,30 @@ public class MusicManager : MonoBehaviour
 
 	void Start()
 	{
-		// OnLevelWasLoaded(0);
+		OnSceneLoaded(SceneManager.GetActiveScene(), LoadSceneMode.Single);
 	}
 
-	void OnLevelWasLoaded(int sceneIndex)
+	void OnEnable()
 	{
-		string newSceneName = SceneManager.GetActiveScene().name;
-		if (newSceneName != sceneName)
+		SceneManager.sceneLoaded += OnSceneLoaded;
+	}
+
+	void OnDisable()
+	{
+		SceneManager.sceneLoaded -= OnSceneLoaded;
+		CancelInvoke(nameof(PlayMusic));
+	}
+
+	void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+	{
+		if (scene.name == sceneName)
 		{
-			sceneName = newSceneName;
-			Invoke("PlayMusic", .2f);
+			return;
 		}
+
+		sceneName = scene.name;
+		CancelInvoke(nameof(PlayMusic));
+		Invoke(nameof(PlayMusic), .2f);
 	}
 
 	void PlayMusic()
@@ -31,7 +44,7 @@ public class MusicManager : MonoBehaviour
 		if (sceneName == "Menu")
 		{
 			clipToPlay = menuTheme;
-		} else if (sceneName == "Game")
+		} else if (sceneName == "Games")
 		{
 			clipToPlay = mainTheme;
 		}
@@ -39,7 +52,8 @@ public class MusicManager : MonoBehaviour
 		if (clipToPlay != null)
 		{
 			AudioManager.instance.PlayMusic(clipToPlay, 2);
-			Invoke("PlayMusic", clipToPlay.length);
+			CancelInvoke(nameof(PlayMusic));
+			Invoke(nameof(PlayMusic), clipToPlay.length);
 		}
 	}
 

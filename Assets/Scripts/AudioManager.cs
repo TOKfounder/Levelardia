@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class AudioManager : MonoBehaviour
 {
@@ -42,22 +43,46 @@ public class AudioManager : MonoBehaviour
 			sfx2DSource = newSfx2Dsource.AddComponent<AudioSource>();
 			newSfx2Dsource.transform.parent = transform;
 
-			audioListener = FindAnyObjectByType<AudioListener>().transform;
-			if (FindAnyObjectByType<Player>() != null)
-				playerT = FindAnyObjectByType<Player>().transform;
+			AudioListener listener = FindAnyObjectByType<AudioListener>();
+			if (listener != null)
+			{
+				audioListener = listener.transform;
+			}
+			RefreshPlayerReference();
 			
 			masterVolumePercent = PlayerPrefs.GetFloat("master vol", 1);
 			sfxVolumePercent = PlayerPrefs.GetFloat("sfx vol", 1);
 			musicVolumePercent = PlayerPrefs.GetFloat("music vol", 1);
+
+			SceneManager.sceneLoaded += OnSceneLoaded;
+		}
+	}
+
+	void OnDestroy()
+	{
+		if (instance == this)
+		{
+			SceneManager.sceneLoaded -= OnSceneLoaded;
 		}
 	}
 
 	void Update()
 	{
-		if (playerT != null)
+		if (audioListener != null && playerT != null)
 		{
 			audioListener.position = playerT.position;
 		}
+	}
+
+	void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+	{
+		RefreshPlayerReference();
+	}
+
+	void RefreshPlayerReference()
+	{
+		Player player = FindAnyObjectByType<Player>();
+		playerT = (player != null) ? player.transform : null;
 	}
 
 	public void SetVolume(float volumePercent, AudioChannel channel)
